@@ -1,0 +1,31 @@
+occupation,soc_group,ai_exposure,median_wage,employment_k,wage_at_risk
+Software Developers,Computer & Math,0.76,130160,1847,98922
+Data Scientists,Computer & Math,0.81,108020,168,87496
+Financial Analysts,Business & Finance,0.79,99890,296,78913
+Accountants & Auditors,Business & Finance,0.72,79880,1389,57514
+Paralegals,Legal,0.74,59200,347,43808
+Lawyers,Legal,0.44,145760,813,64134
+Graphic Designers,Arts & Design,0.69,59530,244,41076
+Writers & Authors,Arts & Design,0.73,73690,141,53794
+Customer Service Reps,Office Support,0.55,39680,2916,21824
+Medical Transcriptionists,Healthcare Support,0.83,35270,55,29274
+Radiologists,Healthcare,0.42,252040,27,105857
+Physicians,Healthcare,0.22,236000,756,51920
+Registered Nurses,Healthcare,0.14,89010,3244,12461
+Elementary Teachers,Education,0.19,63680,1429,12099
+Postsecondary Teachers,Education,0.36,84380,1266,30377
+Truck Drivers,Transportation,0.04,50340,1944,2014
+Construction Workers,Construction,0.02,41730,909,835
+Cooks,Food Prep,0.03,33200,2235,996
+Retail Salespersons,Sales,0.21,31970,4200,6714
+Management Analysts,Business & Finance,0.77,99400,677,76538
+Market Research Analysts,Business & Finance,0.78,74680,792,58250
+HR Specialists,Business & Finance,0.58,67650,875,39237
+Insurance Underwriters,Business & Finance,0.79,76790,102,60664
+Claims Adjusters,Business & Finance,0.68,71530,287,48640
+Tax Preparers,Business & Finance,0.77,48220,66,37129
+Editors,Arts & Design,0.73,73080,117,53348
+Translators,Arts & Design,0.64,57090,54,36538
+Statisticians,Computer & Math,0.76,104860,44,79694
+Actuaries,Computer & Math,0.67,120970,28,81050
+Database Administrators,Computer & Math,0.72,101000,139,72720

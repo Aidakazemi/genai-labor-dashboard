@@ -1,0 +1,25 @@
+{
+  "last_updated_utc": "2026-06-24T20:30:59Z",
+  "data_sources": [
+    {
+      "name": "BLS CPS/CES/JOLTS",
+      "url": "https://api.bls.gov/publicAPI/v2/"
+    },
+    {
+      "name": "FRED",
+      "url": "https://fred.stlouisfed.org/"
+    },
+    {
+      "name": "Tech Layoffs Dataset",
+      "url": "https://github.com/datasets/tech-layoffs"
+    },
+    {
+      "name": "Eloundou et al. (2023) AI Exposure",
+      "url": "https://arxiv.org/abs/2303.10130"
+    },
+    {
+      "name": "Stanford HAI AI Index",
+      "url": "https://aiindex.stanford.edu/"
+    }
+  ]
+}

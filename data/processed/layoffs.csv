@@ -1,0 +1,21 @@
+company,layoffs,date,industry,country,percentage
+Meta,11000,2022-11-09,Technology,United States,13
+Amazon,18000,2023-01-04,Technology,United States,6
+Google,12000,2023-01-20,Technology,United States,6
+Microsoft,10000,2023-01-18,Technology,United States,5
+Salesforce,8000,2023-01-04,Technology,United States,10
+Twitter,3700,2022-11-04,Technology,United States,50
+Stripe,1120,2022-11-03,Fintech,United States,14
+Lyft,683,2022-11-03,Transportation,United States,13
+Coinbase,950,2022-06-14,Crypto,United States,18
+IBM,3900,2023-01-26,Technology,United States,1
+Zoom,1300,2023-02-07,Technology,United States,15
+Indeed,2200,2023-03-22,HR Tech,United States,15
+Dropbox,500,2023-04-27,Technology,United States,16
+OpenAI,150,2024-11-15,AI,United States,5
+Stability AI,20,2024-03-06,AI,United States,20
+Chegg,441,2024-01-31,Edtech,United States,23
+Google,1000,2024-01-10,Technology,United States,0
+Discord,170,2023-12-19,Technology,United States,17
+eBay,1000,2024-01-23,E-commerce,United States,9
+Spotify,1500,2023-12-04,Technology,United States,17

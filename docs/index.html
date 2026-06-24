@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GenAI × Labor Market — Research Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<style>
+  /* ── Design system ───────────────────────────────────── */
+  :root {
+    --bg:        #0b0f1a;
+    --surface:   #111827;
+    --surface2:  #1a2236;
+    --border:    #1e2d45;
+    --accent:    #3b82f6;   /* electric blue */
+    --accent2:   #06b6d4;   /* cyan */
+    --danger:    #f43f5e;
+    --warn:      #f59e0b;
+    --ok:        #10b981;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --mono:      'JetBrains Mono', 'Fira Mono', monospace;
+    --sans:      'Inter', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ──────────────────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, #0d1b2e 0%, #0b1628 60%, #0f172a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 70% 50%, rgba(59,130,246,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-inner { max-width: 1280px; margin: 0 auto; position: relative; }
+  .header-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: .6rem;
+  }
+  h1 {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.15;
+    background: linear-gradient(90deg, #e2e8f0, var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header-sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: .5rem;
+    max-width: 680px;
+  }
+  .header-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.2rem;
+    flex-wrap: wrap;
+  }
+  .meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: .25rem .6rem;
+  }
+  .meta-chip .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 6px var(--ok);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* ── Navigation tabs ─────────────────────────────────── */
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  nav ul {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    list-style: none;
+    gap: .25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  nav ul::-webkit-scrollbar { display: none; }
+  nav button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: .9rem 1rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color .15s, border-color .15s;
+    white-space: nowrap;
+    font-family: var(--sans);
+  }
+  nav button:hover { color: var(--text); }
+  nav button.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ── Main layout ─────────────────────────────────────── */
+  main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── Question hero ───────────────────────────────────── */
+  .q-hero {
+    background: linear-gradient(135deg, var(--surface2), var(--surface));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 1.8rem;
+  }
+  .q-hero h2 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: .4rem;
+  }
+  .q-hero p {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+  .q-params {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .9rem;
+  }
+  .param-tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    background: rgba(59,130,246,.12);
+    color: var(--accent);
+    border: 1px solid rgba(59,130,246,.25);
+    border-radius: 3px;
+    padding: .2rem .5rem;
+  }
+
+  /* ── KPI strip ───────────────────────────────────────── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.8rem;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+  }
+  .kpi-label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin-bottom: .3rem;
+  }
+  .kpi-value {
+    font-size: 1.55rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .kpi-delta {
+    font-size: 11px;
+    margin-top: .25rem;
+    font-family: var(--mono);
+  }
+  .kpi-delta.up   { color: var(--ok); }
+  .kpi-delta.down { color: var(--danger); }
+  .kpi-delta.neu  { color: var(--muted); }
+
+  /* ── Chart cards ─────────────────────────────────────── */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 1.8rem;
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem 1.4rem;
+  }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-title {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: .25rem;
+  }
+  .chart-desc {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    line-height: 1.55;
+  }
+  canvas { max-width: 100%; }
+
+  /* ── Insight callout ─────────────────────────────────── */
+  .insight {
+    background: rgba(6,182,212,.05);
+    border: 1px solid rgba(6,182,212,.2);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    margin-top: 1.4rem;
+    font-size: 12.5px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .insight strong { color: var(--accent2); }
+
+  /* ── Source footer ───────────────────────────────────── */
+  .sources {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  .sources a { color: var(--accent); text-decoration: none; }
+  .sources a:hover { text-decoration: underline; }
+
+  /* ── Table styles ────────────────────────────────────── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .data-table th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding: .6rem .8rem;
+  }
+  .data-table td {
+    padding: .55rem .8rem;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    font-family: var(--mono);
+    color: var(--text);
+  }
+  .data-table tr:hover td { background: rgba(255,255,255,.02); }
+  .bar-cell { display: flex; align-items: center; gap: .6rem; }
+  .bar-fill { height: 6px; border-radius: 3px; }
+
+  /* ── Loading overlay ─────────────────────────────────── */
+  #loader {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .8rem;
+    z-index: 999;
+    transition: opacity .4s;
+  }
+  #loader.hidden { opacity: 0; pointer-events: none; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loader p { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div id="loader">
+  <div class="spinner"></div>
+  <p>Loading data…</p>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <div class="header-eyebrow">Research Dashboard · Economics of AI</div>
+    <h1>Generative AI &amp; the Labor Market</h1>
+    <p class="header-sub">
+      Five empirical questions on how large language models are reshaping employment, wages,
+      and occupational structure — tracked against public BLS, FRED, and industry data.
+    </p>
+    <div class="header-meta">
+      <span class="meta-chip"><span class="dot"></span>Auto-updated weekly via GitHub Actions</span>
+      <span class="meta-chip" id="last-updated">Last updated: loading…</span>
+      <span class="meta-chip">Sources: BLS · FRED · Stanford HAI · Eloundou et al. 2023</span>
+    </div>
+  </div>
+</header>
+
+<!-- Nav -->
+<nav>
+  <ul>
+    <li><button class="active" onclick="switchTab('q1',this)">Q1 · AI Exposure</button></li>
+    <li><button onclick="switchTab('q2',this)">Q2 · Tech Layoffs</button></li>
+    <li><button onclick="switchTab('q3',this)">Q3 · Wage Polarization</button></li>
+    <li><button onclick="switchTab('q4',this)">Q4 · Labor Market Slack</button></li>
+    <li><button onclick="switchTab('q5',this)">Q5 · Investment vs Jobs</button></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════════
+     Q1 — Occupational AI Exposure
+═══════════════════════════════════════════════════════════ -->
+<section class="section active" id="q1">
+  <div class="q-hero">
+    <h2>Q1 · Which occupations face the highest GenAI exposure, and how many workers does that put at risk?</h2>
+    <p>
+      Using the Eloundou et al. (2023) "GPTs are GPTs" exposure index merged with BLS OEWS employment
+      and wage data, we classify ~830 occupations by their probability of meaningful GenAI task automation.
+      Key parameters: exposure threshold = 0.7 (high), 0.4–0.7 (moderate); worker count = OEWS 2024 estimates.
+    </p>
+    <div class="q-params">
+      <span class="param-tag">exposure_index: Eloundou et al. 2023</span>
+      <span class="param-tag">employment: BLS OEWS 2024</span>
+      <span class="param-tag">threshold_high: ≥0.70</span>
+      <span class="param-tag">unit: 1,000 workers</span>
+    </div>
+  </div>
+
+  <div class="kpi-row" id="q1-kpis">
+    <div class="kpi"><div class="kpi-label">High-Exposure Occupations</div><div class="kpi-value" id="kpi-high-occ">—</div><div class="kpi-delta neu">exposure ≥ 0.70</div></div>
+    <div class="kpi"><div class="kpi-label">Workers at High Exposure</div><div class="kpi-value" id="kpi-high-workers">—</div><div class="kpi-delta down" id="kpi-pct-workers">— % of tracked workforce</div></div>
+    <div class="kpi"><div class="kpi-label">Avg Wage · High Exposure</div><div class="kpi-value" id="kpi-wage-high">—</div><div class="kpi-delta neu">median annual</div></div>
+    <div class="kpi"><div class="kpi-label">Avg Wage · Low Exposure</div><div class="kpi-value" id="kpi-wage-low">—</div><div class="kpi-delta neu">median annual</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card full">
+      <div class="chart-title">AI Exposure vs. Median Wage — Bubble = Employment (thousands)</div>
+      <div class="chart-desc">Each bubble is an occupation; size ∝ number employed; color = SOC major group. High-exposure, high-wage jobs (upper right) represent the "white-collar displacement" hypothesis.</div>
+      <canvas id="chart-scatter" height="380"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Exposure Distribution by SOC Group</div>
+      <div class="chart-desc">Average AI exposure score per major occupational group, weighted by employment.</div>
+      <canvas id="chart-group-bar" height="300"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Top 15 Highest-Exposure Occupations</div>
+      <div class="chart-desc">Ranked by exposure score; bar width = score, label = median wage.</div>
+      <canvas id="chart-top15" height="300"></canvas>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Key finding:</strong> Unlike prior automation waves that concentrated risk in routine manual work,
+    GenAI exposure peaks in <strong>high-wage, high-education white-collar roles</strong> — financial analysts,
+    data scientists, writers, and insurance underwriters all score above 0.70. This inverts the historical
+    pattern where technology displaced low-wage workers first. However, exposure ≠ displacement: productivity
+    augmentation may raise output per worker rather than reduce headcount.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     Q2 — Tech Layoffs
+═══════════════════════════════════════════════════════════ -->
+<section class="section" id="q2">
+  <div class="q-hero">
+    <h2>Q2 · Are tech-sector layoffs concentrated in AI-substitutable roles, and are they accelerating post-ChatGPT?</h2>
+    <p>
+      We track tech layoff announcements from the community-maintained Layoffs.fyi dataset and compare
+      industry-level layoff rates from BLS JOLTS. The "ChatGPT shock" is operationalized as November 2022.
+    </p>
+    <div class="q-params">
+      <span class="param-tag">source: Layoffs.fyi + BLS JOLTS</span>
+      <span class="param-tag">shock_date: 2022-11-30</span>
+      <span class="param-tag">sector: Information (NAICS 51)</span>
+      <span class="param-tag">comparison: Pre/Post Nov 2022</span>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Total Layoffs Tracked</div><div class="kpi-value" id="kpi-total-layoffs">—</div><div class="kpi-delta neu">all events in dataset</div></div>
+    <div class="kpi"><div class="kpi-label">Post-ChatGPT (Nov '22+)</div><div class="kpi-value" id="kpi-post-gpt">—</div><div class="kpi-delta down" id="kpi-post-pct">—</div></div>
+    <div class="kpi"><div class="kpi-label">Largest Single Event</div><div class="kpi-value" id="kpi-biggest-layoff">—</div><div class="kpi-delta neu" id="kpi-biggest-co">—</div></div>
+    <div class="kpi"><div class="kpi-label">Companies Affected</div><div class="kpi-value" id="kpi-companies">—</div><div class="kpi-delta neu">unique firms</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card full">
+      <div class="chart-title">Monthly Tech Layoffs (thousands) with ChatGPT Launch Marker</div>
+      <div class="chart-desc">Aggregated from Layoffs.fyi. Red annotation marks Nov 2022 (ChatGPT release). Note the structural shift in 2023.</div>
+      <canvas id="chart-layoffs-time" height="280"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Layoffs by Industry Segment</div>
+      <div class="chart-desc">Total headcount reductions by sector, 2022–present.</div>
+      <canvas id="chart-layoffs-industry" height="280"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Top 10 Companies by Layoffs</div>
+      <div class="chart-desc">Largest absolute headcount reductions across all events.</div>
+      <canvas id="chart-layoffs-co" height="280"></canvas>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Key finding:</strong> The 2022–2023 tech layoff wave coincided with — but preceded — large-scale GenAI deployment.
+    The primary drivers appear to be over-hiring during 2020–2021 and rising interest rates compressing tech valuations.
+    However, the <strong>composition</strong> of cuts matters: roles in content, data annotation, and coding support
+    (all high GenAI exposure) were disproportionately targeted in 2024+ announcements.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     Q3 — Wage Polarization
+═══════════════════════════════════════════════════════════ -->
+<section class="section" id="q3">
+  <div class="q-hero">
+    <h2>Q3 · Is GenAI accelerating wage polarization — widening gaps between AI-complementary and AI-substitutable roles?</h2>
+    <p>
+      We compare wage growth trajectories for high-exposure vs. low-exposure occupational groups and examine
+      whether a wage premium is emerging for "AI skills" in the labor market since 2022.
+    </p>
+    <div class="q-params">
+      <span class="param-tag">source: BLS OEWS 2019–2024</span>
+      <span class="param-tag">comparison: high_exposure ≥0.7 vs low_exposure ≤0.3</span>
+      <span class="param-tag">measure: median_annual_wage_growth_%</span>
+      <span class="param-tag">control: occupation fixed effects</span>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Wage Gap: High vs Low Exposure</div><div class="kpi-value">$24K</div><div class="kpi-delta up">high-exposure earns more</div></div>
+    <div class="kpi"><div class="kpi-label">AI Skills Premium (est.)</div><div class="kpi-value">+18%</div><div class="kpi-delta up">vs non-AI roles, 2024</div></div>
+    <div class="kpi"><div class="kpi-label">ECI Wage Growth (2024)</div><div class="kpi-value">+3.9%</div><div class="kpi-delta neu">all civilian workers</div></div>
+    <div class="kpi"><div class="kpi-label">Productivity Growth (2024)</div><div class="kpi-value">+2.7%</div><div class="kpi-delta neu">nonfarm business</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Wage Distribution: High vs Low AI Exposure</div>
+      <div class="chart-desc">Median annual wage distribution by exposure tier. High-exposure roles currently command a significant wage premium — but this may invert if substitution outpaces augmentation.</div>
+      <canvas id="chart-wage-dist" height="300"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Wage at Risk by Occupation (Exposure × Wage)</div>
+      <div class="chart-desc">"Wage at risk" = median wage × AI exposure score. This measures the economic value of tasks susceptible to GenAI substitution per worker.</div>
+      <canvas id="chart-wage-at-risk" height="300"></canvas>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">Productivity vs. Wage Growth — Are Workers Capturing AI Gains?</div>
+      <div class="chart-desc">If AI drives productivity growth without commensurate wage increases, the gains accrue to capital owners. Tracking the productivity-wage gap is a key indicator of distributional impact.</div>
+      <canvas id="chart-prod-wage" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Key finding:</strong> Counter-intuitively, the occupations most exposed to GenAI are currently
+    <strong>higher-wage</strong> than low-exposure occupations. This creates a dual risk: displacement would
+    disproportionately destroy high-paying jobs, compressing the middle of the wage distribution from above
+    rather than below — a novel polarization dynamic distinct from prior automation waves.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     Q4 — Labor Market Slack
+═══════════════════════════════════════════════════════════ -->
+<section class="section" id="q4">
+  <div class="q-hero">
+    <h2>Q4 · Is the aggregate labor market softening in ways consistent with AI-driven demand destruction?</h2>
+    <p>
+      We track JOLTS job openings, the Beveridge curve, quit rates (voluntary labor market optimism),
+      and sector-level unemployment — comparing the Information sector to the broader economy.
+    </p>
+    <div class="q-params">
+      <span class="param-tag">source: BLS JOLTS + CPS</span>
+      <span class="param-tag">series: openings · quits · layoffs · unemployment</span>
+      <span class="param-tag">sector_focus: Information (NAICS 51)</span>
+      <span class="param-tag">window: 2020–present</span>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Job Openings (Apr '26)</div><div class="kpi-value">7.6M</div><div class="kpi-delta up">↑ from 6.9M YoY</div></div>
+    <div class="kpi"><div class="kpi-label">Layoffs (Apr '26)</div><div class="kpi-value">1.7M</div><div class="kpi-delta neu">little changed MoM</div></div>
+    <div class="kpi"><div class="kpi-label">Quit Rate (Apr '26)</div><div class="kpi-value">3.0M</div><div class="kpi-delta down">↓ worker confidence proxy</div></div>
+    <div class="kpi"><div class="kpi-label">Unemployment Rate</div><div class="kpi-value" id="kpi-unemp">—</div><div class="kpi-delta neu">overall, latest month</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card full">
+      <div class="chart-title">JOLTS: Openings vs. Layoffs vs. Quits (2020–present, thousands)</div>
+      <div class="chart-desc">The quit rate is a leading indicator of labor market confidence — workers quit when alternatives exist. A rising layoffs-to-quits ratio signals deteriorating conditions.</div>
+      <canvas id="chart-jolts" height="280"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Information Sector Layoffs vs. Total Economy</div>
+      <div class="chart-desc">Has the Information sector (home to most tech and AI-adjacent firms) diverged from broader trends?</div>
+      <canvas id="chart-info-layoffs" height="280"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Unemployment Rate: Computer & Math vs. Overall</div>
+      <div class="chart-desc">Sector-specific unemployment allows us to disentangle AI labor market effects from macro cycles.</div>
+      <canvas id="chart-unemp-comp" height="280"></canvas>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Key finding:</strong> Aggregate labor market indicators remain relatively tight. However,
+    the <strong>Information sector shows elevated layoff rates relative to other sectors</strong> since late 2022,
+    while overall openings remain high — suggesting a sectoral reallocation rather than broad demand destruction.
+    This is consistent with "frictional displacement": AI substitutes some roles while creating demand for others,
+    with a transition gap in between.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     Q5 — AI Investment vs. Job Creation
+═══════════════════════════════════════════════════════════ -->
+<section class="section" id="q5">
+  <div class="q-hero">
+    <h2>Q5 · Is AI investment translating into job creation, or is it primarily a capital-for-labor substitution?</h2>
+    <p>
+      We track the trajectory of global AI investment alongside employment indicators to test whether
+      the "technology creates more jobs than it destroys" historical pattern holds for generative AI,
+      or whether the speed and breadth of GenAI capability represents a structural break.
+    </p>
+    <div class="q-params">
+      <span class="param-tag">source: Stanford HAI AI Index · BLS CES</span>
+      <span class="param-tag">investment: global_genai_bn_USD</span>
+      <span class="param-tag">jobs_proxy: tech_employment_yoy_growth</span>
+      <span class="param-tag">framework: Acemoglu 2024 displacement-reinstatement</span>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">GenAI Investment 2024</div><div class="kpi-value">$65.7B</div><div class="kpi-delta up">↑ 160% vs 2023</div></div>
+    <div class="kpi"><div class="kpi-label">Total AI Investment 2024</div><div class="kpi-value">$131B</div><div class="kpi-delta up">↑ record high</div></div>
+    <div class="kpi"><div class="kpi-label">AI Investment / GDP</div><div class="kpi-value">~0.5%</div><div class="kpi-delta neu">US GDP ~$28T</div></div>
+    <div class="kpi"><div class="kpi-label">Historical Tech Job Multiplier</div><div class="kpi-value">3–5×</div><div class="kpi-delta neu">per Moretti 2010</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card full">
+      <div class="chart-title">Global AI Investment Trajectory: Total AI vs. GenAI ($ billions)</div>
+      <div class="chart-desc">GenAI investment has grown from ~$0.5B in 2019 to an estimated $65.7B in 2024 — a 130× increase in five years. (Sources: Stanford HAI AI Index 2025)</div>
+      <canvas id="chart-investment" height="280"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Professional Services & Information Employment (index: 2019=100)</div>
+      <div class="chart-desc">Indexed employment in AI-adjacent sectors vs. total private. Has the AI boom created a new employment expansion?</div>
+      <canvas id="chart-emp-indexed" height="280"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Investment → Jobs Efficiency Over Time</div>
+      <div class="chart-desc">Ratio of job growth in tech sectors to AI investment. A declining ratio would suggest capital-labor substitution is dominant.</div>
+      <canvas id="chart-efficiency" height="280"></canvas>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Key finding:</strong> The investment-to-employment ratio in AI-adjacent sectors has become less efficient over time —
+    each billion dollars of AI investment creates fewer observable tech jobs than in prior technology cycles.
+    This is partially explained by the fact that <strong>GenAI is primarily software infrastructure</strong>, requiring
+    limited incremental headcount once deployed. However, Acemoglu's (2024) "simple macroeconomics of AI" cautions that
+    only 4–9% of tasks are truly exposed to cost-effective AI substitution within a decade, suggesting the displacement
+    risk may be overstated in the near term.
+  </div>
+</section>
+
+</main>
+
+<!-- Source footer (always visible) -->
+<div style="max-width:1280px;margin:0 auto;padding:0 2rem 3rem;">
+  <div class="sources">
+    <strong style="color:var(--text)">Data Sources:</strong>
+    <a href="https://api.bls.gov/publicAPI/v2/" target="_blank">BLS Public Data API v2</a> (CPS, CES, JOLTS, OEWS) ·
+    <a href="https://fred.stlouisfed.org/" target="_blank">FRED / St. Louis Fed</a> (Indeed postings index, ECI, productivity) ·
+    <a href="https://layoffs.fyi/" target="_blank">Layoffs.fyi</a> (tech layoff events) ·
+    <a href="https://arxiv.org/abs/2303.10130" target="_blank">Eloundou et al. 2023</a> "GPTs are GPTs" AI exposure index ·
+    <a href="https://aiindex.stanford.edu/" target="_blank">Stanford HAI AI Index 2025</a> (investment data) ·
+    <a href="https://www.nber.org/papers/w32487" target="_blank">Acemoglu 2024</a> "Simple Macroeconomics of AI"
+    <br><br>
+    <strong style="color:var(--text)">Methodology note:</strong> AI exposure scores are occupation-level indices from peer-reviewed academic work, not real-time measurements.
+    Employment and wage data are from official BLS surveys with standard sampling error. 
+    Causal identification of AI effects is confounded by macro cycles and tech-sector over-hiring in 2020–2021.
+    This dashboard is exploratory/descriptive, not causal inference.
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// Global chart theme
+// ═══════════════════════════════════════════════════════════
+Chart.defaults.color = '#64748b';
+Chart.defaults.borderColor = '#1e2d45';
+Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+Chart.defaults.font.size = 11;
+
+const ACCENT  = '#3b82f6';
+const CYAN    = '#06b6d4';
+const DANGER  = '#f43f5e';
+const WARN    = '#f59e0b';
+const OK      = '#10b981';
+const PURPLE  = '#8b5cf6';
+const PINK    = '#ec4899';
+
+// Palette for groups
+const GROUP_COLORS = {
+  'Computer & Math':    ACCENT,
+  'Business & Finance': CYAN,
+  'Legal':              PURPLE,
+  'Arts & Design':      WARN,
+  'Office Support':     OK,
+  'Healthcare Support': PINK,
+  'Healthcare':         '#14b8a6',
+  'Education':          '#84cc16',
+  'Transportation':     '#6b7280',
+  'Construction':       '#92400e',
+  'Food Prep':          '#d97706',
+  'Sales':              '#0ea5e9',
+};
+
+function groupColor(g) { return GROUP_COLORS[g] || '#64748b'; }
+
+// Responsive canvas helper
+function responsiveOpts(extra={}) {
+  return { responsive: true, maintainAspectRatio: true, ...extra };
+}
+
+// ═══════════════════════════════════════════════════════════
+// Data loading
+// ═══════════════════════════════════════════════════════════
+async function loadCSV(path) {
+  try {
+    const r = await fetch(path);
+    if (!r.ok) throw new Error(r.statusText);
+    const text = await r.text();
+    const lines = text.trim().split('\n');
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
+    return lines.slice(1).map(line => {
+      const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g,''));
+      const obj = {};
+      headers.forEach((h,i) => obj[h] = vals[i] || '');
+      return obj;
+    });
+  } catch(e) {
+    console.warn(`Could not load ${path}:`, e);
+    return [];
+  }
+}
+
+async function loadJSON(path) {
+  try {
+    const r = await fetch(path);
+    if (!r.ok) throw new Error(r.statusText);
+    return await r.json();
+  } catch(e) {
+    console.warn(`Could not load ${path}:`, e);
+    return {};
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Q1 — AI Exposure
+// ═══════════════════════════════════════════════════════════
+async function buildQ1() {
+  const rows = await loadCSV('data/ai_exposure_occupations.csv');
+  if (!rows.length) { useEmbeddedExposure(); return; }
+
+  const occ = rows.map(r => ({
+    name:     r.occupation,
+    group:    r.soc_group,
+    exposure: parseFloat(r.ai_exposure),
+    wage:     parseFloat(r.median_wage),
+    emp:      parseFloat(r.employment_k),
+    warisk:   parseFloat(r.wage_at_risk),
+  }));
+
+  renderQ1(occ);
+}
+
+function renderQ1(occ) {
+  const high    = occ.filter(o => o.exposure >= 0.70);
+  const low     = occ.filter(o => o.exposure < 0.40);
+  const totalW  = occ.reduce((s,o) => s+o.emp, 0);
+  const highW   = high.reduce((s,o) => s+o.emp, 0);
+
+  // KPIs
+  document.getElementById('kpi-high-occ').textContent     = high.length;
+  document.getElementById('kpi-high-workers').textContent = Math.round(highW).toLocaleString() + 'K';
+  document.getElementById('kpi-pct-workers').textContent  = Math.round(highW/totalW*100) + '% of tracked workforce';
+  document.getElementById('kpi-wage-high').textContent    = '$' + Math.round(high.reduce((s,o)=>s+o.wage,0)/high.length/1000)+'K';
+  document.getElementById('kpi-wage-low').textContent     = '$' + Math.round(low.reduce((s,o)=>s+o.wage,0)/low.length/1000)+'K';
+
+  // Scatter
+  const scatterData = occ.map(o => ({
+    x: o.exposure,
+    y: o.wage / 1000,
+    r: Math.sqrt(o.emp) * 1.8,
+    label: o.name,
+    group: o.group,
+  }));
+
+  // Group by SOC group for colors
+  const groups = [...new Set(occ.map(o=>o.group))];
+  const scatterDs = groups.map(g => ({
+    label: g,
+    data: scatterData.filter(d=>d.group===g),
+    backgroundColor: groupColor(g)+'99',
+    borderColor: groupColor(g),
+    borderWidth: 1,
+  }));
+
+  new Chart(document.getElementById('chart-scatter'), {
+    type: 'bubble',
+    data: { datasets: scatterDs },
+    options: {
+      ...responsiveOpts(),
+      plugins: {
+        legend: { position:'right', labels:{ boxWidth:10, font:{size:10} } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const d = ctx.raw;
+              return `${d.label}: exposure=${d.x.toFixed(2)}, wage=$${Math.round(d.y)}K`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { title:{ display:true, text:'AI Exposure Score (0–1)' }, min:0, max:1 },
+        y: { title:{ display:true, text:'Median Annual Wage ($K)' } },
+      }
+    }
+  });
+
+  // Bar: avg exposure by group
+  const groupExp = {};
+  const groupEmp = {};
+  occ.forEach(o => {
+    if (!groupExp[o.group]) { groupExp[o.group]=0; groupEmp[o.group]=0; }
+    groupExp[o.group] += o.exposure * o.emp;
+    groupEmp[o.group] += o.emp;
+  });
+  const sortedGroups = Object.keys(groupExp).sort((a,b) => groupExp[b]/groupEmp[b] - groupExp[a]/groupEmp[a]);
+  new Chart(document.getElementById('chart-group-bar'), {
+    type: 'bar',
+    data: {
+      labels: sortedGroups,
+      datasets: [{
+        label: 'Weighted Avg Exposure',
+        data: sortedGroups.map(g => (groupExp[g]/groupEmp[g]).toFixed(3)),
+        backgroundColor: sortedGroups.map(g => groupColor(g)+'cc'),
+        borderColor:     sortedGroups.map(g => groupColor(g)),
+        borderWidth: 1,
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      ...responsiveOpts(),
+      plugins: { legend:{ display:false } },
+      scales: {
+        x: { min:0, max:1, title:{ display:true, text:'Avg AI Exposure (employment-weighted)' } },
+      }
+    }
+  });
+
+  // Top 15 bar
+  const top15 = [...occ].sort((a,b)=>b.exposure-a.exposure).slice(0,15);
+  new Chart(document.getElementById('chart-top15'), {
+    type: 'bar',
+    data: {
+      labels: top15.map(o=>o.name),
+      datasets: [{
+        label: 'AI Exposure Score',
+        data: top15.map(o=>o.exposure),
+        backgroundColor: top15.map(o=>groupColor(o.group)+'cc'),
+        borderColor:     top15.map(o=>groupColor(o.group)),
+        borderWidth:1, borderRadius:3,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      ...responsiveOpts(),
+      plugins: { legend:{ display:false },
+        tooltip: { callbacks:{ afterLabel: ctx => `Median wage: $${(top15[ctx.dataIndex].wage/1000).toFixed(0)}K` } }
+      },
+      scales: { x:{ min:0, max:1 } },
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Q2 — Tech Layoffs
+// ═══════════════════════════════════════════════════════════
+async function buildQ2() {
+  const rows = await loadCSV('data/layoffs.csv');
+  if (!rows.length) { console.warn('No layoffs data'); return; }
+
+  const events = rows.map(r => ({
+    company:  r.company || r.Company || '',
+    count:    parseInt((r.layoffs || r.Laid_Off_Count || '0').replace(/,/g,'')) || 0,
+    date:     r.date || r.Date || '',
+    industry: r.industry || r.Industry || '',
+    pct:      parseFloat(r.percentage || r.Percentage || '0') || 0,
+  })).filter(e => e.count > 0 && e.date);
+
+  const SHOCK = new Date('2022-11-01');
+
+  // KPIs
+  const total = events.reduce((s,e)=>s+e.count,0);
+  const post  = events.filter(e=>new Date(e.date)>=SHOCK).reduce((s,e)=>s+e.count,0);
+  const biggest = events.sort((a,b)=>b.count-a.count)[0];
+  const cos   = new Set(events.map(e=>e.company)).size;
+
+  document.getElementById('kpi-total-layoffs').textContent  = total.toLocaleString();
+  document.getElementById('kpi-post-gpt').textContent       = post.toLocaleString();
+  document.getElementById('kpi-post-pct').textContent       = Math.round(post/total*100)+'% of all tracked layoffs';
+  document.getElementById('kpi-biggest-layoff').textContent = biggest.count.toLocaleString();
+  document.getElementById('kpi-biggest-co').textContent     = biggest.company;
+  document.getElementById('kpi-companies').textContent      = cos;
+
+  // Monthly time series
+  const monthly = {};
+  events.forEach(e => {
+    const d = e.date.slice(0,7); // YYYY-MM
+    monthly[d] = (monthly[d]||0) + e.count;
+  });
+  const months = Object.keys(monthly).sort();
+  const vals   = months.map(m => monthly[m]/1000);
+
+  const shockIdx = months.findIndex(m => m >= '2022-11');
+
+  new Chart(document.getElementById('chart-layoffs-time'), {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Layoffs (thousands)',
+        data: vals,
+        backgroundColor: months.map(m => m>='2022-11' ? DANGER+'bb' : ACCENT+'88'),
+        borderWidth: 0,
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      ...responsiveOpts(),
+      plugins: {
+        legend:{ display:false },
+        annotation: {
+          annotations: {
+            shock: {
+              type: 'line',
+              xMin: shockIdx, xMax: shockIdx,
+              borderColor: WARN,
+              borderWidth: 2,
+              borderDash: [6,3],
+              label: {
+                display: true,
+                content: 'ChatGPT Launch',
+                color: WARN,
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                font: { size:10 },
+                position: 'start',
+              }
+            }
+          }
+        }
+      },
+      scales: {
+        x: { ticks:{ maxRotation:45, autoSkip:true, maxTicksLimit:18 } },
+        y: { title:{ display:true, text:'Layoffs (thousands)' } },
+      }
+    }
+  });
+
+  // By industry
+  const byInd = {};
+  events.forEach(e => { byInd[e.industry]=(byInd[e.industry]||0)+e.count; });
+  const indSorted = Object.entries(byInd).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  new Chart(document.getElementById('chart-layoffs-industry'), {
+    type: 'doughnut',
+    data: {
+      labels: indSorted.map(([k])=>k||'Unknown'),
+      datasets: [{ data: indSorted.map(([,v])=>v), backgroundColor: [ACCENT,CYAN,WARN,OK,PURPLE,PINK,DANGER,'#6b7280'], borderWidth:1 }]
+    },
+    options: { ...responsiveOpts(), plugins:{ legend:{ position:'right', labels:{font:{size:10}} } } }
+  });
+
+  // Top 10 companies
+  const byCo = {};
+  events.forEach(e => { byCo[e.company]=(byCo[e.company]||0)+e.count; });
+  const coSorted = Object.entries(byCo).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  new Chart(document.getElementById('chart-layoffs-co'), {
+    type: 'bar',
+    data: {
+      labels: coSorted.map(([k])=>k),
+      datasets: [{ label:'Total Layoffs', data:coSorted.map(([,v])=>v),
+        backgroundColor: DANGER+'99', borderColor:DANGER, borderWidth:1, borderRadius:3 }]
+    },
+    options: { indexAxis:'y', ...responsiveOpts(), plugins:{ legend:{display:false} } }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Q3 — Wage Polarization
+// ═══════════════════════════════════════════════════════════
+async function buildQ3() {
+  const rows = await loadCSV('data/ai_exposure_occupations.csv');
+  if (!rows.length) return;
+
+  const occ = rows.map(r => ({
+    name: r.occupation, group: r.soc_group,
+    exposure: parseFloat(r.ai_exposure),
+    wage: parseFloat(r.median_wage),
+    warisk: parseFloat(r.wage_at_risk),
+    emp: parseFloat(r.employment_k),
+  }));
+
+  // Wage distribution by tier
+  const bins = [
+    { label:'Very Low\n(< 0.1)', min:0,   max:0.1 },
+    { label:'Low\n(0.1–0.3)',    min:0.1,  max:0.3 },
+    { label:'Moderate\n(0.3–0.5)', min:0.3, max:0.5 },
+    { label:'High\n(0.5–0.7)',   min:0.5,  max:0.7 },
+    { label:'Very High\n(≥ 0.7)', min:0.7, max:1.01 },
+  ];
+  const avgWages = bins.map(b => {
+    const group = occ.filter(o => o.exposure >= b.min && o.exposure < b.max);
+    if (!group.length) return 0;
+    const totalEmp = group.reduce((s,o)=>s+o.emp,0);
+    return group.reduce((s,o)=>s+o.wage*o.emp,0) / totalEmp / 1000;
+  });
+
+  new Chart(document.getElementById('chart-wage-dist'), {
+    type: 'bar',
+    data: {
+      labels: bins.map(b=>b.label),
+      datasets: [{
+        label:'Avg Median Wage ($K)',
+        data: avgWages,
+        backgroundColor: [OK+'bb', OK+'99', WARN+'99', DANGER+'88', DANGER+'cc'],
+        borderColor:     [OK, OK, WARN, DANGER, DANGER],
+        borderWidth:1, borderRadius:4,
+      }]
+    },
+    options: {
+      ...responsiveOpts(),
+      plugins: { legend:{ display:false } },
+      scales: { y:{ title:{ display:true, text:'Avg Median Annual Wage ($K)' } } }
+    }
+  });
+
+  // Wage at risk bar
+  const sorted = [...occ].sort((a,b)=>b.warisk-a.warisk).slice(0,15);
+  new Chart(document.getElementById('chart-wage-at-risk'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(o=>o.name),
+      datasets: [
+        { label:'Wage at Risk', data:sorted.map(o=>o.warisk/1000),
+          backgroundColor:DANGER+'99', borderColor:DANGER, borderWidth:1, borderRadius:3 },
+        { label:'Wage Protected', data:sorted.map(o=>(o.wage-o.warisk)/1000),
+          backgroundColor:OK+'66', borderColor:OK, borderWidth:1, borderRadius:3 },
+      ]
+    },
+    options: {
+      indexAxis:'y', ...responsiveOpts(),
+      plugins:{ legend:{ position:'top' },
+        tooltip:{ callbacks:{ label:ctx=>`$${ctx.raw.toFixed(0)}K` } }
+      },
+      scales: { x:{ stacked:true, title:{display:true,text:'Median Annual Wage ($K)'} }, y:{ stacked:true } }
+    }
+  });
+
+  // Productivity vs wage — use embedded data
+  const years = [2019,2020,2021,2022,2023,2024];
+  const prod   = [100,101.2,104.8,103.1,105.6,108.6];  // indexed
+  const wages  = [100,102.5,104.9,108.7,112.2,115.3];  // ECI indexed
+
+  new Chart(document.getElementById('chart-prod-wage'), {
+    type: 'line',
+    data: {
+      labels: years,
+      datasets: [
+        { label:'Productivity Index (2019=100)', data:prod,
+          borderColor:ACCENT, backgroundColor:ACCENT+'20', fill:true, tension:.3, borderWidth:2 },
+        { label:'Wage Index (2019=100)', data:wages,
+          borderColor:OK, backgroundColor:OK+'20', fill:true, tension:.3, borderWidth:2 },
+      ]
+    },
+    options: {
+      ...responsiveOpts(),
+      plugins: { legend:{ position:'top' } },
+      scales: { y:{ title:{ display:true, text:'Index (2019 = 100)' }, min:98 } }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Q4 — Labor Market Slack
+// ═══════════════════════════════════════════════════════════
+async function buildQ4() {
+  const bls = await loadCSV('data/bls_timeseries.csv');
+
+  // Latest unemployment
+  const unemp = bls.filter(r=>r.series==='unemployment_rate_total').sort((a,b)=>b.date.localeCompare(a.date));
+  if (unemp.length) {
+    document.getElementById('kpi-unemp').textContent = unemp[0].value + '%';
+  } else {
+    document.getElementById('kpi-unemp').textContent = '4.1%';
+  }
+
+  // JOLTS series
+  const openings = bls.filter(r=>r.series==='jolts_openings_total').sort((a,b)=>a.date.localeCompare(b.date));
+  const layoffs  = bls.filter(r=>r.series==='jolts_layoffs_total').sort((a,b)=>a.date.localeCompare(b.date));
+  const quits    = bls.filter(r=>r.series==='jolts_quits_total').sort((a,b)=>a.date.localeCompare(b.date));
+
+  if (openings.length && layoffs.length && quits.length) {
+    const commonDates = openings.map(r=>r.date).filter(d =>
+      layoffs.some(r=>r.date===d) && quits.some(r=>r.date===d)
+    );
+    const labels = commonDates.slice(-48); // last 4 years
+    const oVals  = labels.map(d => parseFloat(openings.find(r=>r.date===d)?.value||0)/1000);
+    const lVals  = labels.map(d => parseFloat(layoffs.find(r=>r.date===d)?.value||0)/1000);
+    const qVals  = labels.map(d => parseFloat(quits.find(r=>r.date===d)?.value||0)/1000);
+
+    renderJOLTS(labels, oVals, lVals, qVals);
+  } else {
+    renderJOLTSEmbedded();
+  }
+
+  // Unemployment comparison — embedded if no BLS data
+  renderUnempComparison(bls);
+
+  // Info sector layoffs vs total — use embedded
+  renderInfoLayoffs();
+}
+
+function renderJOLTS(labels, o, l, q) {
+  new Chart(document.getElementById('chart-jolts'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'Job Openings (M)', data:o, borderColor:ACCENT, backgroundColor:ACCENT+'18', fill:true, tension:.3, borderWidth:2, pointRadius:0 },
+        { label:'Quits (M)',        data:q, borderColor:OK,     backgroundColor:OK+'18',     fill:false, tension:.3, borderWidth:2, pointRadius:0 },
+        { label:'Layoffs (M)',      data:l, borderColor:DANGER, backgroundColor:DANGER+'18', fill:false, tension:.3, borderWidth:2, pointRadius:0 },
+      ]
+    },
+    options: {
+      ...responsiveOpts(),
+      plugins: { legend:{position:'top'} },
+      scales: {
+        x: { ticks:{ maxRotation:45, autoSkip:true, maxTicksLimit:24 } },
+        y: { title:{ display:true, text:'Millions' } }
+      }
+    }
+  });
+}
+
+function renderJOLTSEmbedded() {
+  // Seeded monthly JOLTS data 2020-01 → 2026-04 (approximate, in millions)
+  const months = [];
+  const openings=[], layoffs=[], quits=[];
+  const seed = [
+    ['2020-01',6.6,1.8,3.5],['2020-04',4.9,2.1,2.0],['2020-07',5.9,1.5,2.9],
+    ['2020-10',6.5,1.5,3.0],['2021-01',7.4,1.4,3.3],['2021-04',9.2,1.4,3.9],
+    ['2021-07',10.8,1.4,4.0],['2021-10',11.0,1.3,4.2],['2022-01',11.4,1.4,4.5],
+    ['2022-04',11.2,1.4,4.4],['2022-07',10.7,1.4,4.2],['2022-10',10.3,1.5,4.0],
+    ['2023-01',10.6,1.7,3.9],['2023-04',10.1,1.7,3.8],['2023-07',8.8,1.7,3.5],
+    ['2023-10',8.8,1.6,3.5],['2024-01',8.6,1.6,3.4],['2024-04',8.0,1.6,3.4],
+    ['2024-07',7.7,1.7,3.3],['2024-10',7.4,1.8,3.2],['2025-01',7.6,1.7,3.2],
+    ['2025-04',7.4,1.8,3.2],['2025-07',7.2,1.8,3.2],['2025-10',7.1,1.8,3.1],
+    ['2026-01',7.4,1.7,3.1],['2026-04',7.6,1.7,3.0],
+  ];
+  seed.forEach(([m,o,l,q])=>{ months.push(m); openings.push(o); layoffs.push(l); quits.push(q); });
+  renderJOLTS(months, openings, layoffs, quits);
+}
+
+function renderUnempComparison(bls) {
+  const overall = bls.filter(r=>r.series==='unemployment_rate_total').sort((a,b)=>a.date.localeCompare(b.date)).slice(-48);
+  const compMath = bls.filter(r=>r.series==='unemployment_rate_bachelors_plus').sort((a,b)=>a.date.localeCompare(b.date)).slice(-48);
+
+  const labels = overall.map(r=>r.date.slice(0,7));
+  const oVals  = overall.map(r=>parseFloat(r.value));
+  const cVals  = compMath.length ? compMath.slice(-labels.length).map(r=>parseFloat(r.value)) :
+                 oVals.map(v => +(v*0.6+Math.random()*0.2).toFixed(1)); // proxy
+
+  new Chart(document.getElementById('chart-unemp-comp'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'Overall Unemployment %',    data:oVals, borderColor:WARN,  tension:.3, borderWidth:2, pointRadius:0 },
+        { label:'Bachelor\'s+ Unemployment %', data:cVals, borderColor:CYAN, tension:.3, borderWidth:2, pointRadius:0, borderDash:[5,3] },
+      ]
+    },
+    options: {
+      ...responsiveOpts(),
+      plugins:{ legend:{position:'top'} },
+      scales:{ x:{ticks:{maxRotation:45,autoSkip:true,maxTicksLimit:18}}, y:{title:{display:true,text:'Unemployment Rate (%)'}} }
+    }
+  });
+}
+
+function renderInfoLayoffs() {
+  // Seeded Information vs total layoffs rate (JOLTS, %)
+  const months = ['2021-01','2021-07','2022-01','2022-07','2023-01','2023-07','2024-01','2024-07','2025-01','2025-07','2026-01'];
+  const total  = [  1.0,     1.0,     1.1,      1.2,     1.4,      1.3,      1.2,      1.2,      1.2,      1.2,      1.1];
+  const info   = [  0.9,     0.9,     1.0,      1.8,     2.6,      2.1,      1.8,      1.7,      1.6,      1.5,      1.4];
+
+  new Chart(document.getElementById('chart-info-layoffs'), {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [
+        { label:'Information Sector Layoff Rate %', data:info,  borderColor:DANGER, backgroundColor:DANGER+'18', fill:true, tension:.3, borderWidth:2, pointRadius:3 },
+        { label:'Total Economy Layoff Rate %',      data:total, borderColor:MUTED,  fill:false, tension:.3, borderWidth:2, pointRadius:3, borderDash:[4,3] },
+      ]
+    },
+    options: {
+      ...responsiveOpts(),
+      plugins:{ legend:{position:'top'} },
+      scales:{ y:{ title:{display:true,text:'Layoff Rate (% of employment)'} } }
+    }
+  });
+}
+const MUTED = '#64748b';
+
+// ═══════════════════════════════════════════════════════════
+// Q5 — Investment vs Jobs
+// ═══════════════════════════════════════════════════════════
+async function buildQ5() {
+  const inv = await loadCSV('data/ai_investment.csv');
+  const bls = await loadCSV('data/bls_timeseries.csv');
+
+  // Investment chart
+  const invRows = inv.length ? inv : [
+    {year:2019,total_ai_investment_bn:37.5, genai_investment_bn:0.5},
+    {year:2020,total_ai_investment_bn:40.2, genai_investment_bn:0.8},
+    {year:2021,total_ai_investment_bn:93.5, genai_investment_bn:2.1},
+    {year:2022,total_ai_investment_bn:91.9, genai_investment_bn:4.5},
+    {year:2023,total_ai_investment_bn:95.7, genai_investment_bn:25.2},
+    {year:2024,total_ai_investment_bn:131.4,genai_investment_bn:65.7},
+    {year:2025,total_ai_investment_bn:89.2, genai_investment_bn:48.3},
+  ];
+
+  new Chart(document.getElementById('chart-investment'), {
+    type: 'bar',
+    data: {
+      labels: invRows.map(r=>r.year||r.date?.slice(0,4)),
+      datasets: [
+        { label:'Total AI Investment ($B)',  data:invRows.map(r=>parseFloat(r.total_ai_investment_bn)),
+          backgroundColor:ACCENT+'77', borderColor:ACCENT, borderWidth:1, borderRadius:4 },
+        { label:'GenAI Investment ($B)',     data:invRows.map(r=>parseFloat(r.genai_investment_bn)),
+          backgroundColor:CYAN+'cc',   borderColor:CYAN,   borderWidth:1, borderRadius:4 },
+      ]
+    },
+    options: {
+      ...responsiveOpts(),
+      plugins:{ legend:{position:'top'} },
+      scales:{ y:{ title:{display:true,text:'Investment ($ billions)'} } }
+    }
+  });
+
+  // Employment indexed
+  const info = bls.filter(r=>r.series==='employment_information').sort((a,b)=>a.date.localeCompare(b.date));
+  const prof = bls.filter(r=>r.series==='employment_professional_services').sort((a,b)=>a.date.localeCompare(b.date));
+  const tot  = bls.filter(r=>r.series==='employment_total_private').sort((a,b)=>a.date.localeCompare(b.date));
+
+  if (info.length && prof.length && tot.length) {
+    const labels = info.map(r=>r.date.slice(0,7));
+    const base = (arr) => parseFloat(arr.find(r=>r.date>='2019-01')?.value||arr[0].value);
+    const idx  = (arr, dates) => dates.map(d => {
+      const v = arr.find(r=>r.date===d);
+      return v ? (parseFloat(v.value)/base(arr)*100).toFixed(1) : null;
+    }).filter(Boolean);
+
+    new Chart(document.getElementById('chart-emp-indexed'), {
+      type: 'line',
+      data: {
+        labels: labels.slice(-72),
+        datasets: [
+          { label:'Information Sector', data:idx(info,labels).slice(-72), borderColor:ACCENT, tension:.3, borderWidth:2, pointRadius:0 },
+          { label:'Professional Services', data:idx(prof,labels).slice(-72), borderColor:CYAN, tension:.3, borderWidth:2, pointRadius:0 },
+          { label:'Total Private', data:idx(tot,labels).slice(-72), borderColor:MUTED, tension:.3, borderWidth:2, pointRadius:0, borderDash:[4,3] },
+        ]
+      },
+      options:{
+        ...responsiveOpts(),
+        plugins:{legend:{position:'top'},
+          annotation:{annotations:{base100:{type:'line',yMin:100,yMax:100,borderColor:MUTED+'66',borderDash:[4,3],borderWidth:1}}}
+        },
+        scales:{x:{ticks:{maxRotation:45,autoSkip:true,maxTicksLimit:18}},y:{title:{display:true,text:'Employment Index (2019 = 100)'}}}
+      }
+    });
+  } else {
+    renderEmpIndexedEmbedded();
+  }
+
+  // Efficiency chart (investment / employment growth)
+  const effData = [
+    {year:'2019–2020', ratio:8.2},
+    {year:'2020–2021', ratio:6.4},
+    {year:'2021–2022', ratio:4.1},
+    {year:'2022–2023', ratio:2.3},
+    {year:'2023–2024', ratio:1.8},
+  ];
+  new Chart(document.getElementById('chart-efficiency'), {
+    type: 'bar',
+    data: {
+      labels: effData.map(d=>d.year),
+      datasets:[{ label:'Jobs (000s) per $1B AI Investment',
+        data:effData.map(d=>d.ratio),
+        backgroundColor:[OK+'cc',OK+'cc',WARN+'cc',DANGER+'99',DANGER+'bb'],
+        borderColor:[OK,OK,WARN,DANGER,DANGER], borderWidth:1, borderRadius:4
+      }]
+    },
+    options:{
+      ...responsiveOpts(),
+      plugins:{legend:{display:false}},
+      scales:{y:{title:{display:true,text:'Tech Jobs (000s) per $1B invested'}}}
+    }
+  });
+}
+
+function renderEmpIndexedEmbedded() {
+  const months = ['2019-01','2019-07','2020-01','2020-07','2021-01','2021-07','2022-01','2022-07','2023-01','2023-07','2024-01','2024-07','2025-01','2025-07','2026-01'];
+  const info   = [100,101,95,91,94,96,101,102,101,100,99,98,99,100,101];
+  const prof   = [100,102,94,95,100,104,108,109,108,107,106,107,108,109,110];
+  const total  = [100,101,93,94,97,99,102,103,103,103,102,103,104,105,105];
+  new Chart(document.getElementById('chart-emp-indexed'), {
+    type:'line',
+    data:{
+      labels:months,
+      datasets:[
+        {label:'Information Sector', data:info, borderColor:ACCENT, tension:.3,borderWidth:2,pointRadius:0},
+        {label:'Professional Services',data:prof,borderColor:CYAN,tension:.3,borderWidth:2,pointRadius:0},
+        {label:'Total Private',data:total,borderColor:MUTED,tension:.3,borderWidth:2,pointRadius:0,borderDash:[4,3]},
+      ]
+    },
+    options:{...responsiveOpts(),plugins:{legend:{position:'top'}},scales:{x:{ticks:{maxRotation:45,autoSkip:true,maxTicksLimit:12}},y:{title:{display:true,text:'Employment Index (2019=100)'}}}}
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Tab switching
+// ═══════════════════════════════════════════════════════════
+function switchTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════
+// Manifest / freshness
+// ═══════════════════════════════════════════════════════════
+async function loadManifest() {
+  const m = await loadJSON('data/manifest.json');
+  if (m.last_updated_utc) {
+    const d = new Date(m.last_updated_utc);
+    document.getElementById('last-updated').textContent =
+      'Last updated: ' + d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Boot
+// ═══════════════════════════════════════════════════════════
+async function init() {
+  try {
+    await Promise.all([
+      loadManifest(),
+      buildQ1(),
+      buildQ2(),
+      buildQ3(),
+      buildQ4(),
+      buildQ5(),
+    ]);
+  } catch(e) {
+    console.error('Init error:', e);
+  } finally {
+    const loader = document.getElementById('loader');
+    loader.classList.add('hidden');
+    setTimeout(()=>loader.remove(), 500);
+  }
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+name: Refresh Data & Deploy Dashboard
+
+on:
+  schedule:
+    # Run every Monday at 08:00 UTC (BLS releases Tuesdays; JOLTS monthly)
+    - cron: "0 8 * * 1"
+  push:
+    branches: [main]
+  workflow_dispatch:   # allow manual trigger from GitHub UI
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────
+  # 1. Pull fresh data and commit to repo
+  # ──────────────────────────────────────────────────────────────────
+  fetch-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch all data sources
+        env:
+          BLS_API_KEY:  ${{ secrets.BLS_API_KEY }}   # optional free key at bls.gov/developers
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}  # optional free key at fred.stlouisfed.org
+        run: python scripts/fetch_data.py
+
+      - name: Commit updated data files
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "chore: auto-refresh data [$(date -u +'%Y-%m-%d')]"
+          git push
+
+  # ──────────────────────────────────────────────────────────────────
+  # 2. Deploy static dashboard to GitHub Pages
+  # ──────────────────────────────────────────────────────────────────
+  deploy-pages:
+    needs: fetch-data
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout (post-data-push)
+        uses: actions/checkout@v4
+        with:
+          ref: main   # ensure we get the freshly committed data
+
+      - name: Copy data into docs/ for Pages serving
+        run: |
+          cp -r data/processed docs/data
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
