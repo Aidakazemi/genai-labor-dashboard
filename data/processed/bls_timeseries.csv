@@ -51,8 +51,9 @@ employment_finance,2026,M01,9147,2026-01-01
 employment_finance,2026,M02,9149,2026-02-01
 employment_finance,2026,M03,9132,2026-03-01
 employment_finance,2026,M04,9126,2026-04-01
-employment_finance,2026,M05,9104,2026-05-01
+employment_finance,2026,M05,9106,2026-05-01
 employment_finance,2026,M06,9104,2026-06-01
+employment_finance,2026,M07,9090,2026-07-01
 employment_information,2022,M01,2984,2022-01-01
 employment_information,2022,M02,2990,2022-02-01
 employment_information,2022,M03,3018,2022-03-01
@@ -105,8 +106,9 @@ employment_information,2026,M01,2815,2026-01-01
 employment_information,2026,M02,2792,2026-02-01
 employment_information,2026,M03,2793,2026-03-01
 employment_information,2026,M04,2787,2026-04-01
-employment_information,2026,M05,2783,2026-05-01
-employment_information,2026,M06,2774,2026-06-01
+employment_information,2026,M05,2782,2026-05-01
+employment_information,2026,M06,2769,2026-06-01
+employment_information,2026,M07,2780,2026-07-01
 employment_professional_services,2022,M01,22183,2022-01-01
 employment_professional_services,2022,M02,22372,2022-02-01
 employment_professional_services,2022,M03,22483,2022-03-01
@@ -159,8 +161,9 @@ employment_professional_services,2026,M01,22408,2026-01-01
 employment_professional_services,2026,M02,22412,2026-02-01
 employment_professional_services,2026,M03,22440,2026-03-01
 employment_professional_services,2026,M04,22460,2026-04-01
-employment_professional_services,2026,M05,22471,2026-05-01
-employment_professional_services,2026,M06,22507,2026-06-01
+employment_professional_services,2026,M05,22466,2026-05-01
+employment_professional_services,2026,M06,22500,2026-06-01
+employment_professional_services,2026,M07,22518,2026-07-01
 employment_total_private,2022,M01,127957,2022-01-01
 employment_total_private,2022,M02,128793,2022-02-01
 employment_total_private,2022,M03,129282,2022-03-01
@@ -213,8 +216,9 @@ employment_total_private,2026,M01,135263,2026-01-01
 employment_total_private,2026,M02,135115,2026-02-01
 employment_total_private,2026,M03,135317,2026-03-01
 employment_total_private,2026,M04,135467,2026-04-01
-employment_total_private,2026,M05,135564,2026-05-01
-employment_total_private,2026,M06,135613,2026-06-01
+employment_total_private,2026,M05,135528,2026-05-01
+employment_total_private,2026,M06,135558,2026-06-01
+employment_total_private,2026,M07,135588,2026-07-01
 jolts_layoffs_information,2022,M01,59,2022-01-01
 jolts_layoffs_information,2022,M02,12,2022-02-01
 jolts_layoffs_information,2022,M03,18,2022-03-01
@@ -267,7 +271,8 @@ jolts_layoffs_information,2026,M01,50,2026-01-01
 jolts_layoffs_information,2026,M02,53,2026-02-01
 jolts_layoffs_information,2026,M03,60,2026-03-01
 jolts_layoffs_information,2026,M04,55,2026-04-01
-jolts_layoffs_information,2026,M05,51,2026-05-01
+jolts_layoffs_information,2026,M05,44,2026-05-01
+jolts_layoffs_information,2026,M06,56,2026-06-01
 jolts_layoffs_total,2022,M01,1423,2022-01-01
 jolts_layoffs_total,2022,M02,1401,2022-02-01
 jolts_layoffs_total,2022,M03,1377,2022-03-01
@@ -320,7 +325,8 @@ jolts_layoffs_total,2026,M01,1660,2026-01-01
 jolts_layoffs_total,2026,M02,1714,2026-02-01
 jolts_layoffs_total,2026,M03,1884,2026-03-01
 jolts_layoffs_total,2026,M04,1667,2026-04-01
-jolts_layoffs_total,2026,M05,1708,2026-05-01
+jolts_layoffs_total,2026,M05,1761,2026-05-01
+jolts_layoffs_total,2026,M06,1766,2026-06-01
 jolts_openings_information,2022,M01,238,2022-01-01
 jolts_openings_information,2022,M02,242,2022-02-01
 jolts_openings_information,2022,M03,262,2022-03-01
@@ -373,7 +379,8 @@ jolts_openings_information,2026,M01,100,2026-01-01
 jolts_openings_information,2026,M02,80,2026-02-01
 jolts_openings_information,2026,M03,83,2026-03-01
 jolts_openings_information,2026,M04,82,2026-04-01
-jolts_openings_information,2026,M05,76,2026-05-01
+jolts_openings_information,2026,M05,72,2026-05-01
+jolts_openings_information,2026,M06,90,2026-06-01
 jolts_openings_total,2022,M01,11210,2022-01-01
 jolts_openings_total,2022,M02,11698,2022-02-01
 jolts_openings_total,2022,M03,12301,2022-03-01
@@ -426,7 +433,8 @@ jolts_openings_total,2026,M01,7240,2026-01-01
 jolts_openings_total,2026,M02,6922,2026-02-01
 jolts_openings_total,2026,M03,6887,2026-03-01
 jolts_openings_total,2026,M04,7585,2026-04-01
-jolts_openings_total,2026,M05,7594,2026-05-01
+jolts_openings_total,2026,M05,7537,2026-05-01
+jolts_openings_total,2026,M06,7359,2026-06-01
 jolts_quits_total,2022,M01,4413,2022-01-01
 jolts_quits_total,2022,M02,4233,2022-02-01
 jolts_quits_total,2022,M03,4447,2022-03-01
@@ -479,7 +487,8 @@ jolts_quits_total,2026,M01,3131,2026-01-01
 jolts_quits_total,2026,M02,3046,2026-02-01
 jolts_quits_total,2026,M03,3160,2026-03-01
 jolts_quits_total,2026,M04,3043,2026-04-01
-jolts_quits_total,2026,M05,3065,2026-05-01
+jolts_quits_total,2026,M05,3153,2026-05-01
+jolts_quits_total,2026,M06,3232,2026-06-01
 unemployment_rate_bachelors_plus,2022,M01,2.3,2022-01-01
 unemployment_rate_bachelors_plus,2022,M02,2.1,2022-02-01
 unemployment_rate_bachelors_plus,2022,M03,1.9,2022-03-01
@@ -534,6 +543,7 @@ unemployment_rate_bachelors_plus,2026,M03,2.8,2026-03-01
 unemployment_rate_bachelors_plus,2026,M04,2.8,2026-04-01
 unemployment_rate_bachelors_plus,2026,M05,2.7,2026-05-01
 unemployment_rate_bachelors_plus,2026,M06,2.7,2026-06-01
+unemployment_rate_bachelors_plus,2026,M07,2.7,2026-07-01
 unemployment_rate_total,2022,M01,4.0,2022-01-01
 unemployment_rate_total,2022,M02,3.9,2022-02-01
 unemployment_rate_total,2022,M03,3.7,2022-03-01
@@ -588,3 +598,4 @@ unemployment_rate_total,2026,M03,4.3,2026-03-01
 unemployment_rate_total,2026,M04,4.3,2026-04-01
 unemployment_rate_total,2026,M05,4.3,2026-05-01
 unemployment_rate_total,2026,M06,4.2,2026-06-01
+unemployment_rate_total,2026,M07,4.1,2026-07-01
