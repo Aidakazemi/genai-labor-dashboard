@@ -1,6 +1,6 @@
 # GenAI × Labor Market — Research Dashboard
 
-> **Live dashboard →** `https://aidakazemi.github.io/genai-labor-dashboard/`  
+> **Live dashboard →** https://aidakazemi.github.io/genai-labor-dashboard/  
 > Auto-updated every Monday via GitHub Actions from BLS, FRED, and public research data.
 
 ---
