@@ -134,4 +134,4 @@ Data from BLS, FRED, and Stanford HAI is public domain / openly licensed. Origin
 
 ---
 
-*Built by [your name] · PhD researcher in Business Analytics · [LinkedIn](#) · [GitHub](#)*
+*Built by Aida Kazemi · Researcher in Business Analytics · [LinkedIn](#) · [GitHub](#)*
