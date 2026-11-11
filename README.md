@@ -1,6 +1,6 @@
 # GenAI × Labor Market — Research Dashboard
 
-> **Live dashboard →** `https://<your-username>.github.io/genai-labor-dashboard/`  
+> **Live dashboard →** `https://aidakazemi.github.io/genai-labor-dashboard/`  
 > Auto-updated every Monday via GitHub Actions from BLS, FRED, and public research data.
 
 ---
@@ -125,6 +125,16 @@ cd docs && python -m http.server 8080 # serve dashboard
 - Autor, D., Levy, F., & Murnane, R. J. (2003). *The Skill Content of Recent Technological Change.* QJE.
 - Stanford HAI. (2025). *AI Index Report 2025.* Stanford University.
 - Brynjolfsson, E., Li, D., & Raymond, L. (2023). *Generative AI at Work.* NBER Working Paper 31161.
+
+---
+
+## Citation
+
+If you use this dashboard in academic work:
+
+> Kazemi, A. (2026). *U.S. Generative AI Labor Dashboard* [Data visualization].
+> Data sources: BLS API; FRED API.
+> Retrieved from 'https://aidakazemi.github.io/financial-literacy-dashboard/'
 
 ---
 
